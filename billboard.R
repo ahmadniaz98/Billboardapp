@@ -46,6 +46,20 @@ ui <- fluidPage(theme = shinytheme("cyborg"),
                            )
                   ),
                   
+                  tabPanel("Top 10 History",
+                           sidebarPanel(
+                             tags$h3("Input:"),
+                             dateInput("date", "Select a Date:", value = Sys.Date()),
+                             actionButton("btn3", 
+                                          "Submit", 
+                                          class = "btn btn-primary")
+                           ),
+                           mainPanel(
+                             tags$label(h3('Output')), # Status/Output Text Box
+                             verbatimTextOutput('contents3'),
+                             tableOutput('table2')
+                           )
+                  ),
                   
                   
                 )
@@ -88,6 +102,17 @@ server <- function(input, output, session) {
         geom_line()+
         labs(title = paste("Billboard Chart Progression for",input$txt2), x="Date", y="Rank")+
         theme_minimal()
+    }
+  })
+  
+  output$table2 <- renderTable({
+    if(input$btn3>0){
+      req(input$date)
+      billboard100 %>%
+        mutate(date = as.Date(date, format = "%Y-%m-%d")) %>%
+        arrange(abs(date - as.Date(!!input$date))) %>%
+        head(10) %>%
+        select(rank, artist, song)
     }
   })
   
